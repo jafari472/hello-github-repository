@@ -1,3 +1,4 @@
+#Heat_Template_version_ _2018-08-31_
 heat_template_version: "2018-08-31"
 description: "create 3 instances for authentiq and system-information services"
 parameters:
