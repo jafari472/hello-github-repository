@@ -1,1 +1,65 @@
 heat_template_version: "2018-08-31"
+description: "create 3 instances for authentiq and system-information services"
+parameters:
+  image_id:
+    type: string
+    description: base image name
+    default: "Ubuntu-20.04"
+resources:
+  int_net:
+    type: OS::Neutron::Net
+    properties:
+      admin_state_up: true
+      name: auth-app
+  net1_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network: { get_resource: int_net}
+      cidr: "192.168.65.0/26"
+      dns_nameservers: ["8.8.8.8"]
+      gateway_ip: "192.168.65.1"
+      ip_version: 4
+  router1:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info: { network: public }
+      name: cloud-app
+  router1_interface1:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router1 }
+      subnet_id: { get_resource: net1_subnet}
+  node1_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: int_net }
+      fixed_ips:
+        - subnet_id: { get_resource: net1_subnet}
+  node2_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: int_net}
+      fixed_ips:
+        - subnet_id: { get_resource: net1_subnet}
+  node1:
+    type: OS::Nova::Server
+    properties:
+      name: node1
+      image: { get_param: image_id }
+      flavor: appnode
+      networks:
+        - port: { get_resource: node1_port }
+
+  node2:
+    type: OS::Nova::Server
+    properties:
+      name: node2
+      image: { get_param: image_id }
+      flavor: appnode
+      networks:
+        - port: { get_resource: node2_port }
+
+
+
+
+
