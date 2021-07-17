@@ -1,11 +1,25 @@
-#Heat_Template_version_ _2018-08-31_
+#project openstack
 heat_template_version: "2018-08-31"
 description: "create 3 instances for authentiq and system-information services"
 parameters:
   image_id:
     type: string
-    description: base image name
+    description: main image 
     default: "Ubuntu-20.04"
+  flavor_app:
+    type: string
+    description: flavor name
+    default: "appnode"
+  flavor_db:
+    type: string
+    description: flavor name 
+    default: "databasenode"
+  key_pairs:
+    type: string
+    label: Key pairs
+    default: "mysshkey"
+    description: Name of key-pairs
+
 resources:
   int_net:
     type: OS::Neutron::Net
@@ -20,15 +34,15 @@ resources:
       dns_nameservers: ["8.8.8.8"]
       gateway_ip: "192.168.65.1"
       ip_version: 4
-  router1:
+  router:
     type: OS::Neutron::Router
     properties:
       external_gateway_info: { network: public }
       name: cloud-app
-  router1_interface1:
+  router_interface1:
     type: OS::Neutron::RouterInterface
     properties:
-      router_id: { get_resource: router1 }
+      router_id: { get_resource: router }
       subnet_id: { get_resource: net1_subnet}
   node1_port:
     type: OS::Neutron::Port
@@ -59,7 +73,50 @@ resources:
       flavor: appnode
       networks:
         - port: { get_resource: node2_port }
+        
+app_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: "Security group for ICMP, HTTP and SSH"
+      name: app-secgroup
+      rules:
+      - direction: egress
+        ethertype: IPv4
+        remote_ip_prefix: 0.0.0.0/0
+      - direction: ingress
+        protocol: icmp
+      - direction: ingress
+        ethertype: IPv4
+        port_range_max: 80
+        port_range_min: 80
+        protocol: tcp
+      - direction: ingress
+        ethertype: IPv4
+        port_range_max: 22
+        port_range_min: 22
+        protocol: tcp
 
+  mongo_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: "Security group dbmongo"
+      name: mongo-secgroup
+      rules:
+      - direction: egress
+        ethertype: IPv4
+        remote_ip_prefix: 0.0.0.0/0
+      - direction: ingress
+        protocol: icmp
+      - direction: ingress
+        ethertype: IPv4
+        port_range_max: 27017
+        port_range_min: 27017
+        protocol: tcp
+      - direction: ingress
+        ethertype: IPv4
+        port_range_max: 22
+        port_range_min: 22
+        protocol: tcp
 
 
 
