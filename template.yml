@@ -175,7 +175,7 @@ lb_port:
       subnet: { get_resource: net1_subnet }
       weight: 1
 
-  pool_member_node:
+  pool_member_node2:
     type: OS::Octavia::PoolMember
     properties:
       address: { get_attr: [ node2, first_address ]}
