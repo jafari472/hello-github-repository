@@ -13,10 +13,10 @@ parameters:
   flavor_db:
     type: string
     description: flavor name 
-    default: "databasenode"
-  key_pairs:
+    default: "databasenod"
+  key_name:
     type: string
-    label: Key pairs
+    label: Key name
     default: "mysshkey"
     description: Name of key-pairs
 
@@ -87,59 +87,59 @@ resources:
     properties:
       name: node-mongo
       image: { get_param: image_id }
-      flavor: { get_param: flavor_id_db }
+      flavor: { get_param: flavor_db }
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: node_mongo_port }
         
-app_security_group:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      description: "Security group for ICMP, HTTP and SSH"
-      name: app-secgroup
-      rules:
-      - direction: egress
-        ethertype: IPv4
-        remote_ip_prefix: 0.0.0.0/0
-      - direction: ingress
-        protocol: icmp
-      - direction: ingress
-        ethertype: IPv4
-        port_range_max: 80
-        port_range_min: 80
-        protocol: tcp
-      - direction: ingress
-        ethertype: IPv4
-        port_range_max: 22
-        port_range_min: 22
-        protocol: tcp
+  app_security_group:
+      type: OS::Neutron::SecurityGroup
+      properties:
+        description: "Security group for ICMP, HTTP and SSH"
+        name: app-secgroup
+        rules:
+        - direction: egress
+          ethertype: IPv4
+          remote_ip_prefix: 0.0.0.0/0
+        - direction: ingress
+          protocol: icmp
+        - direction: ingress
+          ethertype: IPv4
+          port_range_max: 80
+          port_range_min: 80
+          protocol: tcp
+        - direction: ingress
+          ethertype: IPv4
+          port_range_max: 22
+          port_range_min: 22
+          protocol: tcp
 
   mongo_security_group:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      description: "Security group dbmongo"
-      name: mongo-secgroup
-      rules:
-      - direction: egress
-        ethertype: IPv4
-        remote_ip_prefix: 0.0.0.0/0
-      - direction: ingress
-        protocol: icmp
-      - direction: ingress
-        ethertype: IPv4
-        port_range_max: 27017
-        port_range_min: 27017
-        protocol: tcp
-      - direction: ingress
-        ethertype: IPv4
-        port_range_max: 22
-        port_range_min: 22
-        protocol: tcp
+      type: OS::Neutron::SecurityGroup
+      properties:
+        description: "Security group dbmongo"
+        name: mongo-secgroup
+        rules:
+        - direction: egress
+          ethertype: IPv4
+          remote_ip_prefix: 0.0.0.0/0
+        - direction: ingress
+          protocol: icmp
+        - direction: ingress
+          ethertype: IPv4
+          port_range_max: 27017
+          port_range_min: 27017
+          protocol: tcp
+        - direction: ingress
+          ethertype: IPv4
+          port_range_max: 22
+          port_range_min: 22
+          protocol: tcp
  ###create loudbalancer###
-lb_port:
+  lb_port:
     type: OS::Neutron::Port
     properties:
-      # security_groups: [{ get_resource: app_security_group }]
+      
       network_id: { get_resource: int_net }
       fixed_ips:
         - subnet_id: { get_resource: net1_subnet }
