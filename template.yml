@@ -117,12 +117,12 @@ app_security_group:
         port_range_max: 22
         port_range_min: 22
         protocol: tcp
-        ###loudbalancer###
+ ###create loudbalancer###
 lb_port:
     type: OS::Neutron::Port
     properties:
       # security_groups: [{ get_resource: app_security_group }]
-      network_id: { get_resource: net1 }
+      network_id: { get_resource: int_net }
       fixed_ips:
         - subnet_id: { get_resource: net1_subnet }
 
@@ -179,7 +179,7 @@ lb_port:
   lbaas_port:
     type: OS::Neutron::Port
     properties:
-      network_id: { get_resource: net1 }
+      network_id: { get_resource: int_net }
       fixed_ips:
         - subnet_id: { get_resource: net1_subnet }
 
