@@ -1,6 +1,6 @@
 #project openstack
 heat_template_version: "2018-08-31"
-description: "create 3 instances for authentiq and system-information services"
+description: "create instances for authentiq and system-information services"
 parameters:
   image_id:
     type: string
@@ -56,6 +56,14 @@ resources:
       network_id: { get_resource: int_net}
       fixed_ips:
         - subnet_id: { get_resource: net1_subnet}
+   node_mongo_port:
+    type: OS::Neutron::Port
+    properties:
+      security_groups: [{ get_resource: mongo_security_group }]
+      network_id: { get_resource: int_net }
+      fixed_ips:
+        - ip_address: "192.168.65.28"
+  
   node1:
     type: OS::Nova::Server
     properties:
@@ -73,6 +81,16 @@ resources:
       flavor: appnode
       networks:
         - port: { get_resource: node2_port }
+
+  node_mongo:
+    type: OS::Nova::Server
+    properties:
+      name: node-mongo
+      image: { get_param: image_id }
+      flavor: { get_param: flavor_id_db }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: node_mongo_port }
         
 app_security_group:
     type: OS::Neutron::SecurityGroup
