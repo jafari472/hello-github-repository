@@ -117,6 +117,7 @@ app_security_group:
         port_range_max: 22
         port_range_min: 22
         protocol: tcp
+        ###loudbalancer###
 lb_port:
     type: OS::Neutron::Port
     properties:
