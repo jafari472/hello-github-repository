@@ -117,7 +117,82 @@ app_security_group:
         port_range_max: 22
         port_range_min: 22
         protocol: tcp
+lb_port:
+    type: OS::Neutron::Port
+    properties:
+      # security_groups: [{ get_resource: app_security_group }]
+      network_id: { get_resource: net1 }
+      fixed_ips:
+        - subnet_id: { get_resource: net1_subnet }
 
+  lb_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: lb_port }
+
+  lb_pool:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: lb_floating_ip }
+      port_id: { get_resource: lb_port }
+
+  monitor:
+    type: OS::Octavia::HealthMonitor
+    properties:
+      pool: { get_resource: pool }
+      type: PING
+      delay: 15
+      max_retries: 5
+      timeout: 10
+
+  pool_member_node1:
+    type: OS::Octavia::PoolMember
+    properties:
+      address: { get_attr: [ node1, first_address ]}
+      admin_state_up: true
+      pool: { get_resource: pool }
+      protocol_port: 80
+      subnet: { get_resource: net1_subnet }
+      weight: 1
+
+  pool_member_node:
+    type: OS::Octavia::PoolMember
+    properties:
+      address: { get_attr: [ node2, first_address ]}
+      admin_state_up: true
+      pool: { get_resource: pool }
+      protocol_port: 80
+      subnet: { get_resource: net1_subnet }
+      weight: 1
+
+  pool:
+    type: OS::Octavia::Pool
+    properties:
+      admin_state_up: true
+      lb_algorithm: ROUND_ROBIN
+      loadbalancer: { get_resource: lbaas }
+      name: "lb_front_pool"
+      protocol: HTTP
+
+  lbaas_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: net1 }
+      fixed_ips:
+        - subnet_id: { get_resource: net1_subnet }
+
+  lbaas_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: lbaas_port }
+
+  lbaas:
+    type: OS::Octavia::LoadBalancer
+    properties:
+      name: "load-balancer1"
+      vip_subnet: { get_resource: net1_subnet }
 
 
 
