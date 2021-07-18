@@ -56,7 +56,7 @@ resources:
       network_id: { get_resource: int_net}
       fixed_ips:
         - subnet_id: { get_resource: net1_subnet}
-   node_mongo_port:
+  node_mongo_port:
     type: OS::Neutron::Port
     properties:
       security_groups: [{ get_resource: mongo_security_group }]
@@ -82,7 +82,7 @@ resources:
       networks:
         - port: { get_resource: node2_port }
 
-  node_mongo:
+  nodemongo:
     type: OS::Nova::Server
     properties:
       name: node-mongo
